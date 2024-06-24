@@ -300,6 +300,18 @@ webauthn:
     origins:
       - "android:apk-key-hash:nLSu7wVTbnMOxLgC52f2faTnv..."
       - "https://login.example.com"
+## email_delivery ##
+#
+# Settings needed for email delivery.
+#
+email_delivery:
+  ## enabled ##
+  #
+  # Enable or disable email delivery by hanko. Disable if you want to send the emails yourself. To send emails yourself you must subscribe to the `email.create` webhook event.
+  #
+  # Default: true
+  #
+  enabled: true
 ## audit_log ##
 #
 # Configures audit logging
@@ -630,6 +642,84 @@ third_party:
       # Default: true
       #
       allow_linking: true
+    ##
+    #
+    # The Microsoft provider configuration
+    #
+    microsoft:
+      ##
+      #
+      # Enable or disable the Microsoft provider.
+      #
+      # Default: false
+      #
+      enabled: false
+      ##
+      #
+      # The client ID of your Microsoft OAuth credentials.
+      # See: https://docs.hanko.io/guides/authentication-methods/oauth/microsoft
+      #
+      # Required if provider is enabled.
+      #
+      client_id: "CHANGE_ME"
+      ##
+      #
+      # The secret of your Microsoft OAuth credentials.
+      # See: https://docs.hanko.io/guides/authentication-methods/oauth/microsoft
+      #
+      # Required if provider is enabled.
+      #
+      secret: "CHANGE_ME"
+      ##
+      #
+      # Indicates whether accounts can be linked with this provider.
+      # This option only controls linking for existing accounts. Account registrations
+      # are not affected (see the 'accounts.allow_signup' option for controlling
+      # account registration).
+      #
+      #
+      # Default: true
+      #
+      allow_linking: false
+    ##
+    #
+    # The LinkedIn provider configuration
+    #
+    linkedin:
+      ##
+      #
+      # Enable or disable the LinkedIn provider.
+      #
+      # Default: false
+      #
+      enabled: false
+      ##
+      #
+      # The client ID of your LinkedIn OAuth credentials.
+      # See: https://docs.hanko.io/guides/authentication-methods/oauth/linkedin
+      #
+      # Required if provider is enabled.
+      #
+      client_id: "CHANGE_ME"
+      ##
+      #
+      # The secret of your LinkedIn OAuth credentials.
+      # See: https://docs.hanko.io/guides/authentication-methods/oauth/linkedin
+      #
+      # Required if provider is enabled.
+      #
+      secret: "CHANGE_ME"
+      ##
+      #
+      # Indicates whether accounts can be linked with this provider.
+      # This option only controls linking for existing accounts. Account registrations
+      # are not affected (see the 'accounts.allow_signup' option for controlling
+      # account registration).
+      #
+      #
+      # Default: true
+      #
+      allow_linking: false
 log:
   ## log_health_and_metrics
   #
@@ -972,4 +1062,10 @@ webhooks:
         # Email - Triggers on: change of primary email
         #
         - user.update.email.primary
+        ##
+        #
+        # Triggers on: an email was sent or should be sent
+        #
+        - email.send
+
 ```

@@ -33,15 +33,17 @@ func NewSamlHandler(cfg *config.Config, persister persistence.Persister, session
 	providers := make([]provider.ServiceProvider, 0)
 	for _, idpConfig := range cfg.Saml.IdentityProviders {
 		if idpConfig.Enabled {
-			name := ""
-			name, err := parseProviderFromMetadataUrl(idpConfig.MetadataUrl)
+			hostName := ""
+			hostName, err := parseProviderFromMetadataUrl(idpConfig.MetadataUrl)
 			if err != nil {
-				panic(err)
+				fmt.Printf("failed to parse provider '%s' from metadata url: %v\n", idpConfig.Name, err)
+				continue
 			}
 
-			newProvider, err := provider.GetProvider(name, cfg, idpConfig, persister.GetSamlCertificatePersister())
+			newProvider, err := provider.GetProvider(hostName, cfg, idpConfig, persister.GetSamlCertificatePersister())
 			if err != nil {
-				panic(err)
+				fmt.Printf("failed to initialize provider '%s': %v\n", idpConfig.Name, err)
+				continue
 			}
 
 			providers = append(providers, newProvider)
@@ -214,7 +216,7 @@ func (handler *SamlHandler) linkAccount(c echo.Context, redirectTo *url.URL, sta
 	samlError = handler.persister.Transaction(func(tx *pop.Connection) error {
 		userdata := provider.GetUserData(assertionInfo)
 
-		linkResult, samlError := thirdparty.LinkAccount(tx, handler.config, handler.persister, userdata, state.Provider)
+		linkResult, samlError := thirdparty.LinkAccount(tx, handler.config, handler.persister, userdata, state.Provider, true)
 		if samlError != nil {
 			return samlError
 		}

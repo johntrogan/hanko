@@ -50,7 +50,7 @@ func NewWebauthnHandler(cfg *config.Config, persister persistence.Persister, ses
 		RPDisplayName:         cfg.Webauthn.RelyingParty.DisplayName,
 		RPID:                  cfg.Webauthn.RelyingParty.Id,
 		RPOrigins:             cfg.Webauthn.RelyingParty.Origins,
-		AttestationPreference: protocol.PreferNoAttestation,
+		AttestationPreference: protocol.PreferDirectAttestation,
 		AuthenticatorSelection: protocol.AuthenticatorSelection{
 			RequireResidentKey: &f,
 			ResidentKey:        protocol.ResidentKeyRequirementDiscouraged,
@@ -113,7 +113,7 @@ func (h *WebauthnHandler) BeginRegistration(c echo.Context) error {
 			ResidentKey:        protocol.ResidentKeyRequirementRequired,
 			UserVerification:   protocol.UserVerificationRequirement(h.cfg.Webauthn.UserVerification),
 		}),
-		webauthn.WithConveyancePreference(protocol.PreferNoAttestation),
+		webauthn.WithConveyancePreference(protocol.PreferDirectAttestation),
 		// don't set the excludeCredentials list, so an already registered device can be re-registered
 	)
 
@@ -200,9 +200,9 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 				errorMessage = fmt.Sprintf("%s: %s: %s", errorMessage, err.Details, err.DevInfo)
 				errorStatus = http.StatusUnprocessableEntity
 			}
-			err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogWebAuthnRegistrationFinalFailed, user, errors.New(errorMessage))
-			if err != nil {
-				return fmt.Errorf(CreateAuditLogFailureMessage, err)
+			aErr := h.auditLogger.CreateWithConnection(tx, c, models.AuditLogWebAuthnRegistrationFinalFailed, user, errors.New(errorMessage))
+			if aErr != nil {
+				return fmt.Errorf(CreateAuditLogFailureMessage, aErr)
 			}
 
 			return echo.NewHTTPError(errorStatus, errorMessage).SetInternal(err)
